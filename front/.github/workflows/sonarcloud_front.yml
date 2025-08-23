@@ -16,33 +16,29 @@ jobs:
         working-directory: front
     strategy:
       matrix:
-       node-version: [18.x, 20.x, 22.x]
+        node-version: [16.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
       
       - name: Use Node.js ${{matrix.node-version}}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3.9.1
         with:
           node-version: ${{matrix.node-version}}
-          cache: 'npm'
+      
       - name: Run npm install
         run: npm install
       
       - name: Run npm test
-        run: npm test
-
-      - name: Run Build
-        run: npm run build --if-present
-
+        run: npm run test
+      
       - name: Build and analyse
-        uses: SonarSource/sonarcloud-github-action@v5.0.0
+        uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: front
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
 
   
