@@ -32,7 +32,7 @@ jobs:
         run: npm install
       
       - name: Run npm test
-        run: npm run test:prod
+        run: npm run test
       
       - name: Build and analyse
         uses: SonarSource/sonarcloud-github-action@master
