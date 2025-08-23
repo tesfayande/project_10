@@ -32,14 +32,13 @@ jobs:
         run: npm install
       
       - name: Run npm test
-        run: npm run test
+        run: npm run test:prod
       
       - name: Build and analyse
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: front
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   
