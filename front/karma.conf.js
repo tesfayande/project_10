@@ -37,11 +37,8 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Firefox'],
-    plugins: [
-      'karma-firefox-launcher',
-      // other plugins...
-    ],
+    browsers: ['Chrome'],
+  
     singleRun: false,
     restartOnFileChange: true
   });
