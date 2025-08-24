@@ -38,6 +38,10 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['Firefox'],
+    plugins: [
+      'karma-firefox-launcher',
+      // other plugins...
+    ],
     singleRun: false,
     restartOnFileChange: true
   });
