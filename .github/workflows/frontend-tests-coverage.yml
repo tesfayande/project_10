@@ -32,8 +32,7 @@ jobs:
       - name: Run npm install 
         run: npm install
 
-      - name: Install Firefox
-        run: sudo apt-get install -y firefox
+      
 
       - name: Run npm test
         run: npm run test
