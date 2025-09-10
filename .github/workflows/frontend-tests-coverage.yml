@@ -32,9 +32,6 @@ jobs:
       - name: Run npm install 
         run: npm install
 
-      - name: Install Puppeteer and Karma Chrome Launcher
-        run: npm i -D puppeteer karma-chrome-launcher
-      
 
       - name: Run npm test
         run: npm run test
