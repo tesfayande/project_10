@@ -14,4 +14,11 @@ git remote add origin https://github.com/tesfayande/project_10.git
 git branch -M main
 git push -u origin main
 
+## pushing
+
+git add .
+git commit -m "first commit"
+git branch -M main
+git push -u origin main
+
 ## Backend Actions
