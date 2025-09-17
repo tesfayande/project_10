@@ -1,6 +1,0 @@
-{
-  "devDependencies": {
-    "karma-chrome-launcher": "^3.2.0",
-    "puppeteer": "^24.20.0"
-  }
-}
