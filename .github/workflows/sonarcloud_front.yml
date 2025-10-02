@@ -1,9 +1,7 @@
 name: SonarCloud Front (Quality)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_call:
   pull_request:
     types: [opened, synchronize, reopened]
 
