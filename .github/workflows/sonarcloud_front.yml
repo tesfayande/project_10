@@ -1,4 +1,4 @@
-ame: SonarCloud Front (Quality)
+name: SonarCloud Front (Quality)
 
 on:
   workflow_call:
