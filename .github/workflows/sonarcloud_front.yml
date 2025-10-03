@@ -10,7 +10,7 @@ jobs:
     
     steps:
     - name: 📥 Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -19,29 +19,29 @@ jobs:
       with:
         node-version: 'latest'
         cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
+        cache-dependency-path: front/package-lock.json
 
     - name: 🔧 Cache SonarCloud packages
       uses: actions/cache@v4
       with:
         path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar-frontend-${{ hashFiles('frontend/package-lock.json') }}
-        restore-keys: ${{ runner.os }}-sonar-frontend-
+        key: ${{ runner.os }}-sonar-front-${{ hashFiles('front/package-lock.json') }}
+        restore-keys: ${{ runner.os }}-sonar-front-
 
     - name: 📦 Install Dependencies
       run: |
-        cd frontend
+        cd front
         npm ci
 
     - name: 📥 Download Coverage Report
       uses: actions/download-artifact@v4
       with:
-        name: frontend-coverage-report
-        path: frontend/coverage/
+        name: front-coverage-report
+        path: front/coverage/
 
     - name: 🔍 Vérifier le fichier lcov.info
       run: |
-        cd frontend
+        cd front
         echo "🔍 Vérification du fichier lcov.info:"
         if [ -f "coverage/lcov.info" ]; then
           echo "✅ Fichier lcov.info présent"
@@ -55,7 +55,7 @@ jobs:
 
     - name: 🧪 Régénérer les tests si nécessaire
       run: |
-        cd frontend
+        cd front
         if [ ! -f "coverage/lcov.info" ]; then
           echo "🔄 Régénération des tests de couverture..."
           npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
@@ -63,7 +63,7 @@ jobs:
 
     - name: 🎯 Vérifier couverture minimale
       run: |
-        cd frontend
+        cd front
         if [ -f "coverage/lcov.info" ]; then
           echo "🔍 Analyse de la couverture LCOV..."
           TOTAL_FILES=$(grep "end_of_record" coverage/lcov.info | wc -l)
@@ -98,14 +98,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
-        projectBaseDir: frontend/
+        projectBaseDir: front/
         args: |
-          -Dsonar.projectKey=your-org_frontend-angular
-          -Dsonar.organization=your-org
+          -Dsonar.projectKey=tesfayande_project_10_front
+          -Dsonar.organization=tesfayande
           
           # ✅ SECURITY - Analyse de sécurité Angular
           -Dsonar.typescript.security.angular=true
-          -Dsonar.security.config=frontend/sonar-security.json
+          -Dsonar.security.vulnerabilities.enabled=true
           
           # ✅ RELIABILITY - Fiabilité
           -Dsonar.typescript.detectBugs=true
