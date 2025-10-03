@@ -14,14 +14,8 @@ jobs:
         working-directory: front
     strategy:
       matrix:
-        node-version: ['latest']
-        
+        node-version: [latest]
     steps:
-      - name: Cache npm dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -35,12 +29,14 @@ jobs:
       - name: Run npm install
         run: npm install
       
+      
       - name: Build and analyse
         uses: SonarSource/sonarqube-scan-action@v6
-        with:
-          projectBaseDir: front
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  
+        with:
+          projectBaseDir: front
+         
+
