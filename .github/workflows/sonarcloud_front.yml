@@ -47,8 +47,8 @@ jobs:
         with:
           projectBaseDir: front
           args: >
-            -Dsonar.organization=your-organization
-            -Dsonar.projectKey=your-project-key
+            -Dsonar.organization=tesfayande
+            -Dsonar.projectKey=tesfayande_project_10_front
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.test.js,**/*.spec.js,**/tests/**/*,**/coverage/**/*
             -Dsonar.sources=src
