@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [latest]
 
     steps:
       - name: Checkout
@@ -29,7 +29,6 @@ jobs:
 
       - name: Run npm install 
         run: npm install
-
 
       - name: Run npm test
         run: npm run test
