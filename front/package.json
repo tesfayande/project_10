@@ -6,17 +6,8 @@
     "start": "ng serve --proxy-config proxy.config.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "jest",
+    "test": "ng test --browsers=ChromeHeadless --watch=false --code-coverage",
     "test:coverage": "jest --coverage"
-  },
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts",
-      "!src/index.tsx",
-      "!src/serviceWorker.ts"
-    ],
-    "coverageReporters": ["lcov", "text"]
   },
   "private": true,
   "dependencies": {
