@@ -1,153 +1,46 @@
-name: SonarCloud Frontend Analysis
+name: SonarCloud Front (Quality)
 
 on:
   workflow_call:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  sonarcloud-frontend:
-    name: 📊 SonarCloud Frontend Analysis
+  Frontend:
+    name: Frontend
     runs-on: ubuntu-latest
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: 🛠️ Setup Node.js (Latest)
-      uses: actions/setup-node@v4
-      with:
-        node-version: 'latest'
-        cache: 'npm'
-        cache-dependency-path: frontend/package-lock.json
-
-    - name: 🔧 Cache SonarCloud packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.sonar/cache
-        key: ${{ runner.os }}-sonar-frontend-${{ hashFiles('frontend/package-lock.json') }}
-        restore-keys: ${{ runner.os }}-sonar-frontend-
-
-    - name: 📦 Install Dependencies
-      run: |
-        cd frontend
-        npm ci
-
-    - name: 📥 Download Coverage Report
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-coverage-report
-        path: frontend/coverage/
-
-    - name: 🔍 Vérifier le fichier lcov.info
-      run: |
-        cd frontend
-        echo "🔍 Vérification du fichier lcov.info:"
-        if [ -f "coverage/lcov.info" ]; then
-          echo "✅ Fichier lcov.info présent"
-          echo "📊 Statistiques du fichier:"
-          echo "Lignes: $(wc -l < coverage/lcov.info)"
-          echo "Taille: $(du -h coverage/lcov.info | cut -f1)"
-        else
-          echo "❌ Fichier lcov.info introuvable - Génération via ng test"
-          npx ng test --code-coverage --watch=false
-        fi
-
-    - name: 🧪 Régénérer les tests si nécessaire
-      run: |
-        cd frontend
-        if [ ! -f "coverage/lcov.info" ]; then
-          echo "🔄 Régénération des tests de couverture..."
-          npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
-        fi
-
-    - name: 🎯 Vérifier couverture minimale
-      run: |
-        cd frontend
-        if [ -f "coverage/lcov.info" ]; then
-          echo "🔍 Analyse de la couverture LCOV..."
-          TOTAL_FILES=$(grep "end_of_record" coverage/lcov.info | wc -l)
-          COVERED_LINES=$(grep "^DA:" coverage/lcov.info | wc -l)
-          HIT_LINES=$(grep "^DA:" coverage/lcov.info | grep -v ",0" | wc -l)
-          
-          echo "📊 Métriques de couverture:"
-          echo "Fichiers analysés: $TOTAL_FILES"
-          echo "Lignes instrumentées: $COVERED_LINES"
-          echo "Lignes exécutées: $HIT_LINES"
-          
-          if [ $TOTAL_FILES -eq 0 ]; then
-            echo "❌ ERREUR: Aucun fichier analysé dans le rapport LCOV"
-            exit 1
-          fi
-          
-          if [ $HIT_LINES -eq 0 ]; then
-            echo "❌ ERREUR: Couverture à 0% détectée"
-            echo "📋 Vérifiez que vos tests Angular s'exécutent correctement"
-            exit 1
-          fi
-          
-          echo "✅ Couverture valide détectée (> 0%)"
-        else
-          echo "❌ Fichier LCOV non trouvé"
-          exit 1
-        fi
-
-    - name: 📊 SonarCloud Scan Frontend pour Angular
-      uses: sonarsource/sonarqube-scan-action@v6
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        projectBaseDir: frontend/
-        args: |
-          -Dsonar.projectKey=your-org_frontend-angular
-          -Dsonar.organization=your-org
-          
-          # ✅ SECURITY - Analyse de sécurité Angular
-          -Dsonar.typescript.security.angular=true
-          -Dsonar.security.config=frontend/sonar-security.json
-          
-          # ✅ RELIABILITY - Fiabilité
-          -Dsonar.typescript.detectBugs=true
-          -Dsonar.typescript.reliability.enabled=true
-          
-          # ✅ MAINTAINABILITY - Maintenabilité
-          -Dsonar.typescript.complexity.function=15
-          -Dsonar.typescript.complexity.file=200
-          -Dsonar.typescript.maintainability.enabled=true
-          
-          # ✅ COVERAGE - Couverture (obligatoire > 0)
-          -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
-          -Dsonar.tests=src
-          -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts
-          -Dsonar.coverage.exclusions=**/*.spec.ts,**/*.test.ts,**/node_modules/**,**/dist/**,**/e2e/**,**/environments/**
-          
-          # ✅ DUPLICATIONS - Détection des duplications
-          -Dsonar.cpd.typescript.minimumTokens=100
-          -Dsonar.typescript.duplications.enabled=true
-          
-          # ✅ HOTSPOTS - Points chauds de sécurité
-          -Dsonar.security.hotspots.enabled=true
-          
-          # ✅ CONFIGURATION ANGULAR SPÉCIFIQUE
-          -Dsonar.sources=src/app,src/assets,src/environments
-          -Dsonar.typescript.tsconfigPath=tsconfig.app.json
-          -Dsonar.typescript.exclusions=**/node_modules/**,**/*.spec.ts,**/test/**
-          -Dsonar.sourceEncoding=UTF-8
-          -Dsonar.host.url=https://sonarcloud.io
-          
-          # ✅ QUALITY GATE
-          -Dsonar.qualitygate.wait=true
-          -Dsonar.qualitygate.timeout=600
-
-    - name: 📋 Vérification des métriques
-      run: |
-        echo "✅ Métriques SonarCloud activées pour Angular:"
-        echo "🔒 Security - Analyse des vulnérabilités Angular"
-        echo "🛡️ Reliability - Détection des bugs TypeScript"
-        echo "🔧 Maintainability - Complexité et dette technique"
-        echo "🔍 Hotspots Reviewed - Points de sécurité"
-        echo "📈 Coverage - Couverture de code > 0%"
-        echo "📄 Duplications - Code dupliqué < 5%"
+    defaults:
+      run:
+        working-directory: front
+    strategy:
+      matrix:
+        node-version: ['latest']
         
+    steps:
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{matrix.node-version}}
+      
+      - name: Run npm install
+        run: npm install
+      
+      - name: Build and analyse
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          projectBaseDir: front
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   
