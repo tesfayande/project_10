@@ -35,10 +35,15 @@ jobs:
       - name: Run npm install
         run: npm install
       
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
       - name: Build and analyse
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: front
+          args: >
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
