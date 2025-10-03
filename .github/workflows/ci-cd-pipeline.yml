@@ -20,7 +20,7 @@ env:
 
 jobs:
 
-  # Étape 1: Pr Approval Check
+  # Étape 1: Pr Approval Checker
   check-pr-approval:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.base_ref == 'main'
