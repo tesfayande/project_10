@@ -1,14 +1,9 @@
-name: SonarCloud Frontend Analysis
+name: SonarCloud Front (Quality)
 
 on:
   workflow_call:
-    inputs:
-      projectBaseDir:
-        required: true
-        type: string
-      coverageReportPath:
-        required: true
-        type: string
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   Frontend:
@@ -16,28 +11,32 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ${{ inputs.projectBaseDir }}
-
+        working-directory: front
+    strategy:
+      matrix:
+        node-version: [latest]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
+      
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v4
         with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: SonarCloud Scan
+          node-version: ${{matrix.node-version}}
+      
+      - name: Run npm install
+        run: npm install
+      
+      
+      - name: Build and analyse
         uses: SonarSource/sonarqube-scan-action@v6
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: ${{ inputs.projectBaseDir }}
-          args: >
-            -Dsonar.javascript.lcov.reportPaths=${{ inputs.coverageReportPath }}
 
+        with:
+          projectBaseDir: front
+         
 
