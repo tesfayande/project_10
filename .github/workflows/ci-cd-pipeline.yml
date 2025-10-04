@@ -2,70 +2,55 @@ name: CI/CD Pipeline Complète
 
 on:
   push:
-    branches: [ develop, main ] # ADD main here to trigger post-merge steps
+    branches: [development ]
   pull_request:
     branches: [ main ]
-    types: [opened, synchronize, reopened] # Ready_for_review is not needed here
+    types: [opened, synchronize, reopened, ready_for_review]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+   
 env:
-  # ... (your secrets remain the same) ...
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
 jobs:
 
-  # 1. Tests Backend (Runs immediately on PR, required by BPR for merge)
+  # Étape 1: Pr Approval Checker
+  
   backend-tests:
-    # NEEDS NO 'needs' or 'if' condition initially, it is the FIRST step that must run on PR
-    # NEEDS NO 'needs' or 'if' condition initially, it is the FIRST step that must run on PR
-    name: Tests Backend & Coverage
     
-    # Changed from 'uses' to a placeholder, as the external workflow cannot depend on 'needs'
-    # in the parent workflow if it's the required status check.
-    # It's better to run this step directly in the main workflow or have the external workflow
-    # have its own 'on: pull_request' trigger.
-    # ASSUMPTION: You use your existing composite action or external workflow structure.
-    # If the external workflow has an 'on: pull_request' trigger, this job is redundant.
-    # If it is a reusable workflow, remove the 'needs: [check-pr-approval]' from your original.
+    name: Tests Backend & Coverage
     uses: ./.github/workflows/backend-tests-coverage.yml
     secrets: inherit
 
-  # 2. Tests Frontend (Runs immediately on PR, required by BPR for merge)
+  # Étape 3: Tests Frontend
   frontend-tests:
-    # NEEDS NO 'needs' or 'if' condition initially
-    name: Tests Frontend & Coverage
-    uses: ./.github/workflows/frontend-tests-coverage.yml
-    secrets: inherit
-  # 3. Analyse Qualité Backend (déclenchée si TESTS passed AND it is a PUSH to main)
+   name: Tests Frontend & Coverage
+   uses: ./.github/workflows/frontend-tests-coverage.yml
+   secrets: inherit
+
+  # Étape 4: Analyse Qualité Backend (déclenchée si tests OK)
   sonar-backend:
     name: SonarCloud Backend
     needs: [backend-tests, frontend-tests]
-    # Check if the event is a PUSH to main, and the needs are successful
-    #If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     if: always() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_back.yml
     secrets: inherit
 
-  # 4. Analyse Qualité Frontend (déclenchée si TESTS passed AND it is a PUSH to main)
+  # Étape 5: Analyse Qualité Frontend (déclenchée si tests OK)
   sonar-frontend:
     name: SonarCloud Frontend
     needs: [backend-tests, frontend-tests]
-    # Check if the event is a PUSH to main, and the needs are successful
-    # If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     if: always() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_front.yml
     secrets: inherit
 
-  # 5. Build & Push Docker (déclenchée si QUALITÉ passed)
+  # Étape 6: Build & Push Docker (déclenchée si qualité OK)
   docker-build:
     name: Build & Push Docker
     needs: [sonar-backend, sonar-frontend]
-    # Check if the event is a PUSH to main, and the needs are successful
+    #If: always() && needs.sonar-backend.result == 'success' && needs.sonar-frontend.result == 'success'
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-backend.result == 'success' && needs.sonar-frontend.result == 'success'
     uses: ./.github/workflows/docker.yml
     secrets: inherit
