@@ -42,7 +42,8 @@ jobs:
   sonar-frontend:
     name: SonarCloud Frontend
     needs: [backend-tests, frontend-tests]
-    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    #If: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_front.yml
     secrets: inherit
   # Étape 5: Build & Push Docker (déclenchée si qualité OK)
