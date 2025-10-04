@@ -42,7 +42,7 @@ jobs:
   sonar-frontend:
     name: SonarCloud Frontend
     needs: [backend-tests, frontend-tests]
-    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    if: always() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_front.yml
     with:
       projectBaseDir: front
