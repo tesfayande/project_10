@@ -42,8 +42,11 @@ jobs:
   sonar-frontend:
     name: SonarCloud Frontend
     needs: [backend-tests, frontend-tests]
-    if: always() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_front.yml
+    with:
+      projectBaseDir: front
+      coverageReportPath: coverage/lcov.info
     secrets: inherit
 
   # Étape 5: Build & Push Docker (déclenchée si qualité OK)
