@@ -2,7 +2,7 @@ name: CI/CD Pipeline Complète
 
 on:
   push:
-    branches: [development,main]
+    branches: [development]
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened, ready_for_review]
