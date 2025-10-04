@@ -1,7 +1,9 @@
 name: SonarCloud Front (Quality)
 
 on:
+  # Triggered by a push to develop/main via the main CI/CD pipeline
   workflow_call:
+  # Triggered directly when a pull request is opened, synced, or reopened
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -14,11 +16,14 @@ jobs:
         working-directory: front
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [22.x]
+    
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # fetch-depth 0 is critical for SonarCloud to perform a proper differential analysis
           fetch-depth: 0
       
       - name: Use Node.js ${{matrix.node-version}}
@@ -29,23 +34,39 @@ jobs:
       - name: Run npm install
         run: npm install
       
-      # --- FIX IS HERE ---
-      - name: Build and analyse
+      # ----------------------------------------------------------------------------------
+      # Condition 1: Standard analysis for branch pushes (triggered by workflow_call)
+      # ----------------------------------------------------------------------------------
+      - name: Build and analyze (Branch Mode)
+        # Only run this step if the event is NOT a pull_request (i.e., on push or workflow_call)
+        if: github.event_name != 'pull_request'
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_FRONT }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-         projectBaseDir: front
-         args: >
-            -Dsonar.projectKey=tesfayande_project_10_front
+          projectBaseDir: front
+          args: >
             -Dsonar.organization=tesfayande
-            -Dsonar.sources=.
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/*.test.js,**/*.spec.js,**/src/setupTests.js
-            -Dsonar.coverage.exclusions=**/node_modules/**,**/tests/**,**/*.test.js,**/*.spec.js,**/src/setupTests.js
-            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.projectKey=tesfayande_project_10_frontend
+            
+      # ----------------------------------------------------------------------------------
+      # Condition 2: Pull Request analysis (triggered by pull_request event)
+      # ----------------------------------------------------------------------------------
+      - name: Build and analyze (Pull Request Mode)
+        # Only run this step if the event IS a pull_request
+        if: github.event_name == 'pull_request'
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: front
+          # Explicitly pass all details (including org/key) as arguments to the scanner
+          args: >
+            -Dsonar.organization=tesfayande
+            -Dsonar.projectKey=tesfayande_project_10_frontend
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.head_ref }}
             -Dsonar.pullrequest.base=${{ github.base_ref }}
+            -Dsonar.pullrequest.github.repository=${{ github.repository }}
