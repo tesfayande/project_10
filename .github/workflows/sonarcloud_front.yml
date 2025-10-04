@@ -29,14 +29,23 @@ jobs:
       - name: Run npm install
         run: npm install
       
-      
+      # --- FIX IS HERE ---
       - name: Build and analyse
         uses: SonarSource/sonarqube-scan-action@v6
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_FRONT }}
         with:
-          projectBaseDir: front
-         
-
+         projectBaseDir: front
+         args: >
+            -Dsonar.projectKey=tesfayande_project_10_front
+            -Dsonar.organization=tesfayande
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/*.test.js,**/*.spec.js,**/src/setupTests.js
+            -Dsonar.coverage.exclusions=**/node_modules/**,**/tests/**,**/*.test.js,**/*.spec.js,**/src/setupTests.js
+            -Dsonar.sourceEncoding=UTF-8
+            -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+            -Dsonar.pullrequest.branch=${{ github.head_ref }}
+            -Dsonar.pullrequest.base=${{ github.base_ref }}
