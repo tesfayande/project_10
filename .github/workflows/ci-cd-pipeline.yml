@@ -16,7 +16,7 @@ env:
 
 jobs:
 
-  # Étape 1: Pr Approval Checker
+  # Étape 1: Tests Backend
   
   backend-tests:
     
@@ -24,13 +24,13 @@ jobs:
     uses: ./.github/workflows/backend-tests-coverage.yml
     secrets: inherit
 
-  # Étape 3: Tests Frontend
+  # Étape 2: Tests Frontend
   frontend-tests:
    name: Tests Frontend & Coverage
    uses: ./.github/workflows/frontend-tests-coverage.yml
    secrets: inherit
 
-  # Étape 4: Analyse Qualité Backend (déclenchée si tests OK)
+  # Étape 3: Analyse Qualité Backend (déclenchée si tests OK)
   sonar-backend:
     name: SonarCloud Backend
     needs: [backend-tests, frontend-tests]
@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/sonarcloud_back.yml
     secrets: inherit
 
-  # Étape 5: Analyse Qualité Frontend (déclenchée si tests OK)
+  # Étape 4: Analyse Qualité Frontend (déclenchée si tests OK)
   sonar-frontend:
     name: SonarCloud Frontend
     needs: [backend-tests, frontend-tests]
@@ -46,7 +46,7 @@ jobs:
     uses: ./.github/workflows/sonarcloud_front.yml
     secrets: inherit
 
-  # Étape 6: Build & Push Docker (déclenchée si qualité OK)
+  # Étape 5: Build & Push Docker (déclenchée si qualité OK)
   docker-build:
     name: Build & Push Docker
     needs: [sonar-backend, sonar-frontend]
@@ -54,3 +54,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-backend.result == 'success' && needs.sonar-frontend.result == 'success'
     uses: ./.github/workflows/docker.yml
     secrets: inherit
+  
+  summary:
+    name: Résumé Pipeline
+    needs: [backend-tests, frontend-tests, sonar-backend, sonar-frontend, docker-build]
+    runs-on: ubuntu-latest
+    if: always()
