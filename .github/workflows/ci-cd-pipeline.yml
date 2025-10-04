@@ -56,7 +56,7 @@ jobs:
     secrets: inherit
   
   summary:
-    name: 📋 Résumé Pipeline
+    name: Résumé Pipeline
     needs: [backend-tests, frontend-tests, sonar-backend, sonar-frontend, docker-build]
     runs-on: ubuntu-latest
     if: always()
