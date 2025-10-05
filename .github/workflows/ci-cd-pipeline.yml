@@ -1,9 +1,9 @@
 
-name: 🚀 CI/CD Pipeline Complète
+name: CI/CD Pipeline Complète
 
 on:
   push:
-   branches: [ main, develop ]
+   branches: [develop ]
   pull_request:
    branches: [ main ]
 
@@ -15,19 +15,19 @@ env:
 jobs:
   # Étape 1: Tests Backend
   backend-tests:
-    name: 🧪 Tests Backend & Coverage
+    name: Tests Backend & Coverage
     uses: ./.github/workflows/backend-tests-coverage.yml
     secrets: inherit
 
   # Étape 2: Tests Frontend
   frontend-tests:
-    name: 🎨 Tests Frontend & Coverage
+    name: Tests Frontend & Coverage
     uses: ./.github/workflows/frontend-tests-coverage.yml
     secrets: inherit
 
   # Étape 3: Analyse Qualité Backend et Frontend (déclenchée si tests OK)
   sonar-quality-check:
-    name: 📊 SonarCloud Quality Check 
+    name: SonarCloud Quality Check 
     needs: [backend-tests, frontend-tests]
     if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_quality_check.yml
