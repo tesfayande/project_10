@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/frontend-tests-coverage.yml
     secrets: inherit
 
-  # Étape 3: Analyse Qualité Backend (déclenchée si tests OK)
+  # Étape 3: Analyse Qualité Backend et Frontend (déclenchée si tests OK)
   sonar-quality-check:
     name: 📊 SonarCloud Quality Check 
     needs: [backend-tests, frontend-tests]
