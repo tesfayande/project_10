@@ -70,7 +70,6 @@ jobs:
       - name: Run npm install
         run: npm install
       
-      
       - name: Build and analyse
         uses: SonarSource/sonarqube-scan-action@v6
         env:
