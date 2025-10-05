@@ -1,0 +1,81 @@
+name: SonarCloud Quality Check
+
+on:
+  # Triggers the workflow when a pull request is opened, synchronized, or reopened
+  pull_request:
+    types: [opened, synchronize, reopened]
+    # Optionally limit branches if needed, e.g., branches: [main, develop]
+
+  # Allows the workflow to be called from another workflow (e.g., your main CI/CD pipeline)
+  workflow_call:
+
+jobs:
+  # --------------------
+  # 1. BACKEND ANALYSIS JOB (Java/Maven)
+  # --------------------
+  backend_analysis:
+    name: SonarCloud Back (Quality)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: back # Sets 'back' as the default directory for all 'run' steps
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          # Fetch-depth 0 is required for SonarCloud to perform accurate differential analysis
+          fetch-depth: 0 
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'
+          cache: 'maven' # Use built-in Maven caching
+
+      # The Maven command handles the build, test, and Sonar analysis in one go
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn -B verify 
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          -Dsonar.projectKey=tesfayande_project_10 
+          -Dsonar.organization=tesfayande 
+          # Maven handles PR parameters automatically when run in a GitHub Actions environment
+
+  # --------------------
+  # 2. FRONTEND ANALYSIS JOB (Node/NPM)
+  # --------------------
+  Frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{matrix.node-version}}
+      
+      - name: Run npm install
+        run: npm install
+      
+      
+      - name: Build and analyse
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+        with:
+          projectBaseDir: front

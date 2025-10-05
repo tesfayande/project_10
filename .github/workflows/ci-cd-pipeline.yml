@@ -1,0 +1,46 @@
+
+name: 🚀 CI/CD Pipeline Complète
+
+on:
+  push:
+   branches: [ main, develop ]
+  pull_request:
+   branches: [ main ]
+
+env:
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  # Étape 1: Tests Backend
+  backend-tests:
+    name: 🧪 Tests Backend & Coverage
+    uses: ./.github/workflows/backend-tests-coverage.yml
+    secrets: inherit
+
+  # Étape 2: Tests Frontend
+  frontend-tests:
+    name: 🎨 Tests Frontend & Coverage
+    uses: ./.github/workflows/frontend-tests-coverage.yml
+    secrets: inherit
+
+  # Étape 3: Analyse Qualité Backend (déclenchée si tests OK)
+  sonar-quality-check:
+    name: 📊 SonarCloud Quality Check 
+    needs: [backend-tests, frontend-tests]
+    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    uses: ./.github/workflows/sonarcloud_quality_check.yml
+    secrets: inherit
+
+ 
+  # Étape 4: Build & Push Docker (déclenchée si qualité OK)
+  docker-build:
+    name: 🐳 Build & Push Docker
+    needs: [sonar-quality-check]
+    # If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-quality-check.result == 'success'
+
+    if: github.event_name == 'pull_request' && needs.sonar-quality-check.result == 'success'
+
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit

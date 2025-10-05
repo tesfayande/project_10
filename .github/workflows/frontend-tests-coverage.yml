@@ -1,0 +1,45 @@
+name: Frontend tests (Tests)
+
+on:
+# Triggers the workflow when a pull request is opened, synchronized, or reopened
+  pull_request:
+    types: [opened, synchronize, reopened]
+    # Optionally limit branches if needed, e.g., branches: [main, develop]
+
+  # Allows the workflow to be called from another workflow (e.g., your main CI/CD pipeline)
+  workflow_call:
+  
+jobs:
+  Frontend-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: front
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{matrix.node-version}}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{matrix.node-version}}
+
+      - name: Run npm install 
+        run: npm install
+
+      - name: Run npm test
+        run: npm run test
+
+      
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: karma-report
+          path: front/coverage
