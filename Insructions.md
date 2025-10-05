@@ -21,6 +21,13 @@ git commit -m "first commit"
 git branch -M main
 git push -u origin main
 
+## develop
+
+git add .
+git commit -m "main Branch removed from push"
+git branch -M develop
+git push -u origin develop
+
 ## Backend Actions
 
 ## SonarCloud
