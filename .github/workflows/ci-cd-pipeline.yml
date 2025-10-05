@@ -36,7 +36,7 @@ jobs:
  
   # Étape 4: Build & Push Docker (déclenchée si qualité OK)
   docker-build:
-    name: 🐳 Build & Push Docker
+    name: Build & Push Docker Hub
     needs: [sonar-quality-check]
     # If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-quality-check.result == 'success'
 
