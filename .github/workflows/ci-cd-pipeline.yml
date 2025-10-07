@@ -2,7 +2,7 @@
 name: CI/CD Pipeline Complète
 
 on:
-  
+
   pull_request:
    types: [opened, synchronize, reopened]
    branches: [ main ]
@@ -44,7 +44,7 @@ jobs:
     # If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-quality-check.result == 'success'
     # Déclenche le Build & Push après la fusion d'une Pull Request (événement 'push' vers main/develop) 
     # et seulement si l'étape de qualité (SonarCloud) est un succès.
-    if: github.event_name == 'push' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success' && needs.sonar-quality-check.result == 'success'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-quality-check.result == 'success' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
 
     uses: ./.github/workflows/docker.yml
     secrets: inherit
