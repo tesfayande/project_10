@@ -2,9 +2,7 @@ name: Backend tests (Tests)
 
 on:
 
-    # Optionally limit branches if needed, e.g., branches: [main, develop]
-
-  # Allows the workflow to be called from another workflow (e.g., your main CI/CD pipeline)
+  # Allows the workflow to be called from another workflow  CI/CD pipeline
   workflow_call:
 
 jobs:

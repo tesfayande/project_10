@@ -11,7 +11,7 @@ jobs:
   # 1. BACKEND ANALYSIS JOB (Java/Maven)
   # --------------------
   backend_analysis:
-    name: SonarCloud Back (Quality)
+    name: Backend (Quality)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -45,7 +45,7 @@ jobs:
   # 2. FRONTEND ANALYSIS JOB (Node/NPM)
   # --------------------
   Frontend:
-    name: Frontend
+    name: Frontend(Quality)
     runs-on: ubuntu-latest
     defaults:
       run:
