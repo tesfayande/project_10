@@ -24,7 +24,7 @@ jobs:
   frontend-tests:
     name: Tests Frontend & Coverage
     needs: [backend-tests]
-    if: github.event_name == 'pull_request' && needs.backend-tests.result == 'success'
+    if: success()  && needs.backend-tests.result == 'success'
     uses: ./.github/workflows/frontend-tests-coverage.yml
     secrets: inherit
 
@@ -32,7 +32,7 @@ jobs:
   sonar-quality-check:
     name: SonarCloud Quality Check 
     needs: [backend-tests, frontend-tests]
-    if: github.event_name == 'pull_request' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_quality_check.yml
     secrets: inherit
 
