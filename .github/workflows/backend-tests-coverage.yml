@@ -2,7 +2,7 @@ name: Backend tests (Tests)
 
 on:
  # Triggers the workflow when a pull request is opened, synchronized, or reopened
-  pull_request:
+  #pull_request:
     #types: [opened, synchronize, reopened]
     # Optionally limit branches if needed, e.g., branches: [main, develop]
 
