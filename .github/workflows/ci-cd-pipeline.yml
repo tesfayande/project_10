@@ -16,12 +16,15 @@ jobs:
   # Étape 1: Tests Backend
   backend-tests:
     name: Tests Backend & Coverage
+    if: github.event_name == 'pull_request'
     uses: ./.github/workflows/backend-tests-coverage.yml
     secrets: inherit
 
   # Étape 2: Tests Frontend
   frontend-tests:
     name: Tests Frontend & Coverage
+    needs: [backend-tests]
+    if: github.event_name == 'pull_request' && needs.backend-tests.result == 'success'
     uses: ./.github/workflows/frontend-tests-coverage.yml
     secrets: inherit
 
@@ -29,7 +32,7 @@ jobs:
   sonar-quality-check:
     name: SonarCloud Quality Check 
     needs: [backend-tests, frontend-tests]
-    if: success() && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
+    if: github.event_name == 'pull_request' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'
     uses: ./.github/workflows/sonarcloud_quality_check.yml
     secrets: inherit
 
@@ -37,10 +40,12 @@ jobs:
   # Étape 4: Build & Push Docker (déclenchée si qualité OK)
   docker-build:
     name: Build & Push Docker Hub
-    needs: [sonar-quality-check]
+    needs: [sonar-quality-check, backend-tests, frontend-tests]
     # If: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonar-quality-check.result == 'success'
 
-    if: github.event_name == 'pull_request' && needs.sonar-quality-check.result == 'success'
-
+    # Déclenche le Build & Push après la fusion d'une Pull Request (événement 'push' vers main/develop) 
+    # et seulement si l'étape de qualité (SonarCloud) est un succès.
+    if: github.event_name == 'push' && needs.backend-tests.result == 'success' && needs.frontend-tests.result == 'success'&& needs.sonar-quality-check.result == 'success'
+    
     uses: ./.github/workflows/docker.yml
     secrets: inherit
