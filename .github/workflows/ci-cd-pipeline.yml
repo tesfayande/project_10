@@ -2,9 +2,9 @@
 name: CI/CD Pipeline Complète
 
 on:
-  push:
-   branches: [develop ]
+  
   pull_request:
+   types: [opened, synchronize, reopened]
    branches: [ main ]
 
 env:

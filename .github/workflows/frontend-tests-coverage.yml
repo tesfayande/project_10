@@ -2,9 +2,7 @@ name: Frontend tests (Tests)
 
 on:
 # Triggers the workflow when a pull request is opened, synchronized, or reopened
-  pull_request:
-    types: [opened, synchronize, reopened]
-    # Optionally limit branches if needed, e.g., branches: [main, develop]
+
 
   # Allows the workflow to be called from another workflow (e.g., your main CI/CD pipeline)
   workflow_call:
