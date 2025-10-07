@@ -22,6 +22,8 @@ jobs:
   # Étape 2: Tests Frontend
   frontend-tests:
     name: Tests Frontend & Coverage
+    needs: [backend-tests]
+    if: success() && needs.backend-tests.result == 'success'
     uses: ./.github/workflows/frontend-tests-coverage.yml
     secrets: inherit
 
